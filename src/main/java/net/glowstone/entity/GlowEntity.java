@@ -499,4 +499,25 @@ public abstract class GlowEntity implements Entity {
     public void removeMetadata(String metadataKey, Plugin owningPlugin) {
         bukkitMetadata.removeMetadata(this, metadataKey, owningPlugin);
     }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null) {
+            return false;
+        }
+
+        if (getClass() != object.getClass()) {
+            return false;
+        }
+
+        final GlowEntity entity = (GlowEntity) object;
+        return (getEntityId() == entity.getEntityId());
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 29 * hash + this.getEntityId();
+        return hash;
+    }
 }

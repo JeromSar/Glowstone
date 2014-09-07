@@ -77,6 +77,11 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
      */
     private final Set<GlowChunk.Key> knownChunks = new HashSet<>();
 
+    /*
+     * The players this player cannot see.
+     */
+    private final Set<UUID> hiddenPlayers = new HashSet<>();
+
     /**
      * A queue of BlockChangeMessages to be sent.
      */
@@ -781,7 +786,9 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         }
         Message updateMessage = UserListItemMessage.displayNameOne(getUniqueId(), displayName);
         for (Player player : server.getOnlinePlayers()) {
-            ((GlowPlayer) player).getSession().send(updateMessage);
+            if (player.canSee(this)) {
+                ((GlowPlayer) player).getSession().send(updateMessage);
+            }
         }
     }
 
@@ -1432,15 +1439,29 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
     // Player visibility
 
     public void hidePlayer(Player player) {
+        Validate.notNull(player, "player can not be null");
+        if (!session.isActive()) return;
+        if (equals(player)) return;
+        if (hiddenPlayers.contains(player.getUniqueId())) return;
 
+        world.getEntityManager().deallocate(this);
+        session.sendWithFuture(UserListItemMessage.removeOne(getUniqueId()));
+        hiddenPlayers.add(player.getUniqueId());
     }
 
     public void showPlayer(Player player) {
+        Validate.notNull(player, "player can not be null");
+        if (!session.isActive()) return;
+        if (equals(player)) return;
+        if (!hiddenPlayers.contains(player.getUniqueId())) return;
 
+        world.getEntityManager().allocate(this);
+        session.sendWithFuture(UserListItemMessage.addOne(getProfile()));
+        hiddenPlayers.remove(player.getUniqueId());
     }
 
     public boolean canSee(Player player) {
-        return true;
+        return !hiddenPlayers.contains(player.getUniqueId());
     }
 
     ////////////////////////////////////////////////////////////////////////////
