@@ -632,6 +632,10 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
      * @return If the entity is known to the player's client.
      */
     public boolean canSee(GlowEntity entity) {
+        if (entity instanceof Player) {
+            return !hiddenPlayers.contains(entity.getUniqueId());
+        }
+
         return knownEntities.contains(entity);
     }
 
@@ -1443,8 +1447,6 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         if (!session.isActive()) return;
         if (equals(player)) return;
         if (hiddenPlayers.contains(player.getUniqueId())) return;
-
-        world.getEntityManager().deallocate(this);
         session.sendWithFuture(UserListItemMessage.removeOne(getUniqueId()));
         hiddenPlayers.add(player.getUniqueId());
     }
@@ -1454,8 +1456,6 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         if (!session.isActive()) return;
         if (equals(player)) return;
         if (!hiddenPlayers.contains(player.getUniqueId())) return;
-
-        world.getEntityManager().allocate(this);
         session.sendWithFuture(UserListItemMessage.addOne(getProfile()));
         hiddenPlayers.remove(player.getUniqueId());
     }
