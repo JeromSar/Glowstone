@@ -9,6 +9,10 @@ import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandler;
 import io.netty.handler.codec.CodecException;
+import java.net.InetSocketAddress;
+import java.util.*;
+import java.util.logging.Level;
+import javax.crypto.SecretKey;
 import net.glowstone.EventFactory;
 import net.glowstone.GlowServer;
 import net.glowstone.entity.GlowPlayer;
@@ -30,11 +34,6 @@ import net.glowstone.net.protocol.ProtocolType;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerKickEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
-
-import javax.crypto.SecretKey;
-import java.net.InetSocketAddress;
-import java.util.*;
-import java.util.logging.Level;
 
 /**
  * A single connection to the server, which may or may not be associated with a
@@ -265,10 +264,12 @@ public final class GlowSession extends BasicSession {
         List<UserListItemMessage.Entry> entries = new ArrayList<>();
         for (Player rawPlayer : server.getOnlinePlayers()) {
             GlowPlayer sendPlayer = (GlowPlayer) rawPlayer;
-            if (rawPlayer != player) {
+            if (rawPlayer != player && rawPlayer.canSee(player)) {
                 sendPlayer.getSession().send(addMessage);
             }
-            entries.add(sendPlayer.getUserListEntry());
+            if (player.canSee(rawPlayer)) {
+                entries.add(sendPlayer.getUserListEntry());
+            }
         }
         send(new UserListItemMessage(UserListItemMessage.Action.ADD_PLAYER, entries));
     }

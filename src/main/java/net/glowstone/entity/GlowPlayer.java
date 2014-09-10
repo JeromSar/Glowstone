@@ -3,6 +3,10 @@ package net.glowstone.entity;
 import com.flowpowered.networking.Message;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.logging.Level;
 import net.glowstone.*;
 import net.glowstone.block.entity.TileEntity;
 import net.glowstone.constants.GlowAchievement;
@@ -44,11 +48,6 @@ import org.bukkit.scoreboard.Scoreboard;
 import org.bukkit.util.BlockVector;
 import org.bukkit.util.Vector;
 import org.json.simple.JSONObject;
-
-import java.net.InetSocketAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-import java.util.logging.Level;
 
 /**
  * Represents an in-game player.
@@ -1447,7 +1446,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         if (!session.isActive()) return;
         if (equals(player)) return;
         if (hiddenPlayers.contains(player.getUniqueId())) return;
-        session.sendWithFuture(UserListItemMessage.removeOne(getUniqueId()));
+        session.sendWithFuture(UserListItemMessage.removeOne(player.getUniqueId()));
         hiddenPlayers.add(player.getUniqueId());
     }
 
@@ -1456,7 +1455,7 @@ public final class GlowPlayer extends GlowHumanEntity implements Player {
         if (!session.isActive()) return;
         if (equals(player)) return;
         if (!hiddenPlayers.contains(player.getUniqueId())) return;
-        session.sendWithFuture(UserListItemMessage.addOne(getProfile()));
+        session.sendWithFuture(UserListItemMessage.addOne(((GlowPlayer) player).getProfile()));
         hiddenPlayers.remove(player.getUniqueId());
     }
 
