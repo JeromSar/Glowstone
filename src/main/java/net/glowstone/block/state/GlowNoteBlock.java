@@ -76,7 +76,7 @@ public class GlowNoteBlock extends GlowBlockState implements NoteBlock {
             return false;
         }
 
-        final NotePlayEvent event = EventFactory.onNotePlay(getBlock(), Instrument.getByType(instrument), new Note(note));
+        final NotePlayEvent event = EventFactory.callEvent(new NotePlayEvent(getBlock(), Instrument.getByType(instrument), new Note(note)));
         if (event.isCancelled()) {
             return false;
         }
@@ -88,7 +88,7 @@ public class GlowNoteBlock extends GlowBlockState implements NoteBlock {
 
         GlowChunk.Key key = new GlowChunk.Key(getX() >> 4, getZ() >> 4);
         for (GlowPlayer player : getWorld().getRawPlayers()) {
-            if (player.canSee(key)) {
+            if (player.canSeeChunk(key)) {
                 player.playNote(location, instrument, note);
             }
         }

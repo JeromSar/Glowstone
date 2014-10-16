@@ -11,6 +11,7 @@ import net.glowstone.util.NibbleArray;
 import org.bukkit.Chunk;
 import org.bukkit.World;
 import org.bukkit.entity.Entity;
+import org.bukkit.event.world.ChunkUnloadEvent;
 
 import java.util.*;
 import java.util.logging.Level;
@@ -319,11 +320,11 @@ public final class GlowChunk implements Chunk {
             return false;
         }
 
-        if (EventFactory.onChunkUnload(this).isCancelled()){
+        if (save && !world.getChunkManager().performSave(this)) {
             return false;
         }
 
-        if (save && !world.getChunkManager().performSave(this)) {
+        if (EventFactory.callEvent(new ChunkUnloadEvent(this)).isCancelled()) {
             return false;
         }
 
